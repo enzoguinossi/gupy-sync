@@ -1,3 +1,5 @@
+<img width="1280" height="640" alt="gupy-sync-logo" src="https://github.com/user-attachments/assets/bf258bbe-2bad-4884-9440-033e662ae731" />
+
 # Gupy ↔ LinkedIn Achievements Sync (CLI)
 
 Ferramenta em **Node.js + TypeScript** para **sincronizar certificados/cursos do LinkedIn com a Gupy**, utilizando o CSV oficial exportado pelo LinkedIn e a API privada da Gupy.
