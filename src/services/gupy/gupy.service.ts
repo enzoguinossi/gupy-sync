@@ -3,7 +3,7 @@ import { HttpError } from '../../errors';
 import {
     AchievementResponse,
     UpdateAchievementsPayload,
-} from '../../types/gupy.achievement.types';
+} from './gupy.types';
 
 const ACHIEVEMENTS_PATH= "/curriculum-management/candidate/curriculum/achievement"
 

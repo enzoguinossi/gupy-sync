@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { inferSchema, initParser } from "udsv";
-import { Achievement, AchievementTypes } from "../../types/gupy.achievement.types";
-import { LinkedinAchievementCSV } from "../../types/linkedin.parser.types";
+import { Achievement, AchievementTypes } from '../../services/gupy/gupy.types';
+import { LinkedinAchievementCSV } from "./linkedin.types";
 
 export function parseLinkedinCSV(csvPath: string): Achievement[] {
     const raw = fs.readFileSync(csvPath, 'utf-8')
