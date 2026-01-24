@@ -1,17 +1,16 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { HttpError } from '../../errors';
-import {
-    AchievementResponse,
-    UpdateAchievementsPayload,
-} from './gupy.types';
+import { HttpError } from '../../errors/index.js';
+import { GupyAchievementsPayload } from './gupy.achievement.input.types.js';
+import {GupyAchievementsResponse} from "./gupy.achievement.raw.types.js";
 
 const ACHIEVEMENTS_PATH= "/curriculum-management/candidate/curriculum/achievement"
+const EDUCATION_PATH= "/curriculum-management/candidate/curriculum/academic-formation"
 
 export class GupyService {
     constructor(private readonly http: AxiosInstance) { }
-    async getAchievements(): Promise<AchievementResponse> {
+    async getAchievements(): Promise<GupyAchievementsResponse> {
         try {
-            const res = await this.http.get<AchievementResponse>(
+            const res = await this.http.get<GupyAchievementsPayload>(
                 ACHIEVEMENTS_PATH
             );
 
@@ -26,11 +25,28 @@ export class GupyService {
     }
 
     async replaceAchievements(
-        body: UpdateAchievementsPayload
+        body: GupyAchievementsPayload
     ): Promise<void> {
         try {
             await this.http.put(
                 ACHIEVEMENTS_PATH,
+                body
+            );
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                throw this.mapAxiosError(err);
+            }
+
+            throw err;
+        }
+    }
+
+    async replaceAcademicFormation(
+        body: GupyAchievementsPayload
+    ): Promise<void> {
+        try {
+            await this.http.put(
+                EDUCATION_PATH,
                 body
             );
         } catch (err) {

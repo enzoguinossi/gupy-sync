@@ -1,4 +1,4 @@
-import fs from 'fs';
+import * as fs from 'fs';
 import path from 'path';
 
 export function validateCsvPath(csvPath: string): string {

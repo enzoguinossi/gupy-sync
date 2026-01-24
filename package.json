@@ -1,5 +1,11 @@
 {
+  "name": "gupy-sync",
+  "version": "0.2.0",
+  "bin": {
+    "gupy-sync": "dist/index.js"
+  },
   "dependencies": {
+    "@inquirer/prompts": "^8.2.0",
     "@types/node": "^25.0.9",
     "axios": "^1.13.2",
     "axios-cookiejar-support": "^6.0.5",
@@ -14,6 +20,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "build": "tsc"
   }
 }

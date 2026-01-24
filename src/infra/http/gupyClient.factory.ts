@@ -1,6 +1,6 @@
-import { createGupyHttpClient } from "./axiosClient"; 
-import { createGupyCookieJar } from "./cookieJar";
-import { GupyService } from "../../services/gupy/gupy.service.ts";
+import { createGupyHttpClient } from "./axiosClient.js";
+import { createGupyCookieJar } from "./cookieJar.js";
+import { GupyService} from "../../services/gupy/gupy.service.js";
 
 
 export async function createGupyClient() {

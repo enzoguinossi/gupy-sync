@@ -1,50 +1,83 @@
-import { Command } from 'commander';;
-import { isKnownError, ExitCode } from '../errors';
+import { Command, CommanderError } from 'commander';
 
+import { ExitCode, isKnownError } from '../errors/index.js';
 
-import { createGupyCookieJar } from '../infra/http/cookieJar';
-import { createGupyHttpClient } from '../infra/http/axiosClient';
-import { GupyService } from '../services/gupy/gupy.service';
-import { parseLinkedinCSV } from '../parsers/linkedin/linkedin.parser';
-import { buildAchievementsPayload } from '../services/gupy/gupy.payload';
-import { validateCsvPath } from '../shared/validators/validateCsvPath';
-import { syncGupyToLinkedin } from '../application/syncGupyToLinkedin';
-import { getGupyAchievements } from '../application/getGupyAchievements';
+import { syncGupyToLinkedin } from '../application/syncLinkedinAchievementsToGupy.js';
+import { getGupyAchievements } from '../application/getGupyAchievements.js';
+import { syncLinkedinEducationToGupy } from '../application/syncLinkedinEducationToGupy.js';
 
-const program = new Command()
+import { cliUserInput } from '../infra/cli/cliUserInput.js';
+
+const program = new Command();
+const userInput = cliUserInput;
+
 
 program
     .name('gupy-sync')
-    .description('Sincroniza achievements do LinkedIn com a Gupy')
-    .version('0.1.0');
+    .description('Ferramenta de sincronização entre LinkedIn e Gupy')
+    .version('0.2.0')
+    .option('--debug', 'Exibe o stack trace completo em caso de erro');
+
 
 program
-    .command('import-linkedin')
+    .command('importar-certificados')
     .description('Importa certificados a partir do CSV do LinkedIn')
     .requiredOption('--csv <path>', 'Caminho para o CSV exportado do LinkedIn')
-    .option('--dry-run', 'Não atualiza o Gupy, apenas mostra o resultado da análise do CSV')
+    .option(
+        '--dry-run',
+        'Não envia dados para a Gupy, apenas exibe o resultado da análise'
+    )
     .action(async (options) => {
         await syncGupyToLinkedin(options.csv, options.dryRun);
     });
 
+
 program
-    .command('show-certificates')
-    .description('Mostra os certificados já existentes na Gupy')
+    .command('mostrar-certificados')
+    .description('Exibe os certificados atualmente cadastrados na Gupy')
     .action(async () => {
-       const data = await getGupyAchievements()
-       console.log(JSON.stringify(data, null, 2));
+        const data = await getGupyAchievements();
+        console.log(JSON.stringify(data, null, 2));
     });
 
+program
+    .command('importar-formacao')
+    .description(
+        'Substitui a formação acadêmica da Gupy pelos dados do LinkedIn'
+    )
+    .requiredOption('--csv <path>', 'Caminho para o CSV exportado do LinkedIn')
+    .option(
+        '--dry-run',
+        'Não envia dados para a Gupy, apenas exibe o payload gerado'
+    )
+    .action(async (options) => {
+        await syncLinkedinEducationToGupy(
+            options.csv,
+            options.dryRun,
+            userInput
+        );
+    });
 
 program.exitOverride();
 
-program.parseAsync(process.argv).catch(err => {
-  if (isKnownError(err)) {
-    console.error(err.message);
-    process.exit(err.exitCode);
-  }
+program.parseAsync(process.argv).catch((err) => {
+    const { debug } = program.opts();
 
-  console.error('Erro inesperado:', err);
-  process.exit(ExitCode.UNEXPECTED);
+    if (err instanceof CommanderError) {
+        console.error(err.message);
+        process.exit(ExitCode.CLI);
+    }
+
+    if (isKnownError(err)) {
+        console.error(err.message);
+        if (debug) console.error(err.stack);
+        process.exit(err.exitCode);
+    }
+
+    console.error('❌ Erro inesperado.');
+    if (debug && err instanceof Error) {
+        console.error(err.stack);
+    }
+
+    process.exit(ExitCode.UNEXPECTED);
 });
-
