@@ -1,14 +1,18 @@
-// infra/cli/cliUserInput.ts
-import { select, input } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { UserInput } from "./userInput.types.js";
 
-import { GupyEducationTypes } from "../../parsers/gupy/education/gupy.education.types.js";
+import {
+	GupyEducationTypes,
+	GupyUnderGraduationTypes,
+} from "../../parsers/gupy/education/gupy.education.types.js";
 
 export const cliUserInput: UserInput = {
 	async selectFormationType(context) {
-		return select<GupyEducationTypes>({
+		return select<GupyEducationTypes | GupyUnderGraduationTypes>({
 			message: `Qual o tipo da formação em "${context}"?`,
 			choices: [
+				{ name: "Ensino Fundamental", value: GupyUnderGraduationTypes.completedElementarySchool },
+				{ name: "Ensino Médio", value: GupyUnderGraduationTypes.completedHighSchool },
 				{ name: "Curso Técnico", value: GupyEducationTypes.technical_course },
 				{ name: "Tecnólogo", value: GupyEducationTypes.technological },
 				{ name: "Graduação", value: GupyEducationTypes.graduation },

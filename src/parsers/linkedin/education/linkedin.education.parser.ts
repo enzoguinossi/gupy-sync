@@ -106,7 +106,6 @@ function resolveConclusionStatus(
 function resolveUnderGraduationDegree(
 	hasHighSchool: boolean,
 	hasFundamental: boolean,
-	hasAnyFormation: boolean,
 ): GupyUnderGraduationTypes | undefined {
 	if (hasHighSchool) {
 		return GupyUnderGraduationTypes.completedHighSchool;
@@ -115,12 +114,6 @@ function resolveUnderGraduationDegree(
 	if (hasFundamental) {
 		return GupyUnderGraduationTypes.completedElementarySchool;
 	}
-
-	if (hasAnyFormation) {
-		// Inferência pelo padrão da Gupy
-		return GupyUnderGraduationTypes.completedHighSchool;
-	}
-
 	return undefined;
 }
 
@@ -207,11 +200,7 @@ export function parseLinkedinEducationCSV(csvPath: string): {
 		formations.push(normalized.value);
 	}
 
-	const underGraduationDegree = resolveUnderGraduationDegree(
-		hasHighSchool,
-		hasFundamental,
-		formations.length > 0,
-	);
+	const underGraduationDegree = resolveUnderGraduationDegree(hasHighSchool, hasFundamental);
 
 	return {
 		formations,

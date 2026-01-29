@@ -1,46 +1,55 @@
 {
-  "name": "gupy-sync",
-  "version": "0.3.0",
-  "description": "CLI para sincronizar dados do LinkedIn com a Gupy",
-  "type": "module",
-  "bin": {
-    "gupy-sync": "dist/index.js"
-  },
-  "main": "dist/index.js",
-  "files": [
-    "dist",
-    "README.md",
-    "/docs",
-    "LICENSE"
-  ],
-  "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsc",
-    "prepack": "npm run build"
-  },
-  "dependencies": {
-    "@inquirer/prompts": "^8.2.0",
-    "axios": "^1.13.2",
-    "axios-cookiejar-support": "^6.0.5",
-    "commander": "^14.0.2",
-    "dotenv": "^17.2.3",
-    "jiti": "^2.6.1",
-    "tough-cookie": "^6.0.0",
-    "udsv": "^0.7.3"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@typescript-eslint/parser": "^8.54.0",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-prettier": "^5.5.5",
-    "globals": "^17.2.0",
-    "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+	"name": "gupy-sync",
+	"version": "0.3.1",
+	"description": "CLI para sincronizar dados do LinkedIn com a Gupy",
+	"homepage": "https://github.com/enzoguinossi/gupy-linkedin-sync",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/enzoguinossi/gupy-linkedin-sync"
+	},
+	"bugs": {
+		"url": "https://github.com/enzoguinossi/gupy-linkedin-sync/issues"
+	},
+	"type": "module",
+	"bin": {
+		"gupy-sync": "dist/index.js"
+	},
+	"main": "dist/index.js",
+	"files": [
+		"dist",
+		"README.md",
+		"/docs",
+		"LICENSE"
+	],
+	"scripts": {
+		"dev": "tsx src/index.ts",
+		"build": "tsc",
+		"prepack": "npm run build"
+	},
+	"dependencies": {
+		"@inquirer/prompts": "^8.2.0",
+		"axios": "^1.13.2",
+		"axios-cookiejar-support": "^6.0.5",
+		"commander": "^14.0.2",
+		"dotenv": "^17.2.3",
+		"jiti": "^2.6.1",
+		"tough-cookie": "^6.0.0",
+		"udsv": "^0.7.3"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.39.2",
+		"@typescript-eslint/parser": "^8.54.0",
+		"eslint": "^9.39.2",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-import": "^2.32.0",
+		"eslint-plugin-prettier": "^5.5.5",
+		"globals": "^17.2.0",
+		"prettier": "^3.8.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.54.0"
+	},
+	"engines": {
+		"node": ">=18"
+	}
 }
