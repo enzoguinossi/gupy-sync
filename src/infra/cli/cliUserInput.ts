@@ -1,10 +1,10 @@
 import { input, select } from "@inquirer/prompts";
-import { UserInput } from "./userInput.types.js";
+import { UserInput } from "@/infra/cli/userInput.types.js";
 
 import {
 	GupyEducationTypes,
 	GupyUnderGraduationTypes,
-} from "../../parsers/gupy/education/gupy.education.types.js";
+} from "@/types/gupy/education/enum/gupy.education.enum.js";
 
 export const cliUserInput: UserInput = {
 	async selectFormationType(context) {

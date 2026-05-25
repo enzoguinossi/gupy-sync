@@ -1,5 +1,5 @@
-import { createGupyClient } from "../../infra/http/gupyClient.factory.js";
-import { parseGupyAchievements } from "../../parsers/gupy/achievement/gupy.achievement.parser.js";
+import { createGupyClient } from "@/infra/http/gupyClient.factory.js";
+import { parseGupyAchievements } from "@/parsers/gupy/achievement/gupy.achievement.parser.js";
 
 export async function getGupyAchievements() {
 	const gupy = await createGupyClient();

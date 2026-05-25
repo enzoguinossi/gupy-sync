@@ -1,18 +1,18 @@
-import { parseLinkedinEducationCSV } from "../../parsers/linkedin/education/linkedin.education.parser.js";
-import { UserInput } from "../../infra/cli/userInput.types.js";
-import { buildEducationPayload } from "../../services/gupy/payloads/gupy.payload.js";
-import { createGupyClient } from "../../infra/http/gupyClient.factory.js";
-import { normalizeCourseText } from "../../shared/util/normalizeCourseText.js";
-import { GupyEducationInput } from "../../services/gupy/education/gupy.education.input.types.js";
+import { parseLinkedinEducationCSV } from "@/parsers/linkedin/education/linkedin.education.parser.js";
+import { UserInput } from "@/infra/cli/userInput.types.js";
+import { buildEducationPayload } from "@/services/gupy/payloads/gupy.payload.js";
+import { createGupyClient } from "@/infra/http/gupyClient.factory.js";
+import { normalizeCourseText } from "@/shared/util/normalizeCourseText.js";
+import { GupyEducationInput } from "@/types/gupy/education/input/gupy.education.input.types.js";
 import {
 	GupyEducationTypes,
 	GupyUnderGraduationTypes,
-} from "../../parsers/gupy/education/gupy.education.types.js";
-import { EducationEntity } from "../../domain/entities/education.entity.js";
+} from "@/types/gupy/education/enum/gupy.education.enum.js";
+import { EducationEntity } from "@/domain/entities/education.entity.js";
 import {
 	mapEducationLevelToGupy,
 	mapToGupyEducationInput,
-} from "../../services/gupy/education/gupy.education.mapper.js";
+} from "@/services/gupy/education/gupy.education.mapper.js";
 
 /**
  * Checks if the provided formation type corresponds to an under-graduation level

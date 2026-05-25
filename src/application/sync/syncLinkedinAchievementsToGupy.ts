@@ -1,8 +1,8 @@
-import { createGupyClient } from "../../infra/http/gupyClient.factory.js";
-import { validateCsvPath } from "../../shared/validators/validateCsvPath.js";
-import { parseLinkedinAchievementsCSV } from "../../parsers/linkedin/achievement/linkedin.achievement.parser.js";
-import { buildAchievementsPayload } from "../../services/gupy/payloads/gupy.payload.js";
-import { mapAchievementToGupy } from "../../services/gupy/achievements/gupy.achievement.mapper.js";
+import { createGupyClient } from "@/infra/http/gupyClient.factory.js";
+import { validateCsvPath } from "@/shared/validators/validateCsvPath.js";
+import { parseLinkedinAchievementsCSV } from "@/parsers/linkedin/achievement/linkedin.achievement.parser.js";
+import { buildAchievementsPayload } from "@/services/gupy/payloads/gupy.payload.js";
+import { mapAchievementToGupy } from "@/services/gupy/achievements/gupy.achievement.mapper.js";
 
 /**
  * Synchronizes LinkedIn achievements to Gupy.

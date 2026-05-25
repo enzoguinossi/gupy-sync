@@ -1,15 +1,15 @@
 import {
 	GupyFormationRaw,
 	GupyFormationsRaw,
-} from "../../../services/gupy/education/gupy.education.raw.types.js";
+} from "@/types/gupy/education/raw/gupy.education.raw.types.js";
 import {
 	GupyEducationConclusionStatus,
 	GupyEducationTypes,
 	GupyUnderGraduationTypes,
-} from "./gupy.education.types.js";
-import { EducationEntity } from "../../../domain/entities/education.entity.js";
-import { EducationLevel } from "../../../domain/enums/education-level.enum.js";
-import { EducationStatus } from "../../../domain/enums/education-status.enum.js";
+} from "@/types/gupy/education/enum/gupy.education.enum.js";
+import { EducationEntity } from "@/domain/entities/education.entity.js";
+import { EducationLevel } from "@/domain/enums/education-level.enum.js";
+import { EducationStatus } from "@/domain/enums/education-status.enum.js";
 
 function mapGupyLevelToDomain(
 	level: GupyEducationTypes | GupyUnderGraduationTypes | string,

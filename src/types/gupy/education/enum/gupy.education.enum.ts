@@ -1,14 +1,3 @@
-export interface GupyEducationParsed {
-	formation: GupyEducationTypes;
-	conclusionStatus: GupyEducationConclusionStatus;
-	course: string;
-	institution: string;
-	startDateMonth: number;
-	startDateYear: number;
-	endDateMonth: number;
-	endDateYear: number;
-}
-
 export enum GupyEducationTypes {
 	technical_course = "technical_course",
 	technological = "technological",

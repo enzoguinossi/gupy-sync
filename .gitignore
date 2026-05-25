@@ -4,7 +4,3 @@
 /node_modules
 /dist
 /.CHANGES
-/.prettierignore
-/.prettierrc
-/AGENTS.md
-/eslint.config.ts

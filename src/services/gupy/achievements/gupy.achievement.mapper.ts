@@ -1,6 +1,6 @@
-import { AchievementEntity, AchievementType } from "../../../domain/entities/achievement.entity.js";
-import { GupyAchievementInput } from "./gupy.achievement.input.types.js";
-import { GupyAchievementTypesEnum } from "./gupy.achievement.raw.types.js";
+import { AchievementEntity, AchievementType } from "@/domain/entities/achievement.entity.js";
+import { GupyAchievementInput } from "@/types/gupy/achievement/input/gupy.achievement.input.types.js";
+import { GupyAchievementTypesEnum } from "@/types/gupy/achievement/raw/gupy.achievement.raw.types.js";
 
 /**
  * Maps a domain AchievementEntity to a GupyAchievementInput.

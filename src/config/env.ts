@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { CliError } from "../errors/index.js";
+import { CliError } from "@/errors/index.js";
 
 let gupyToken: string | undefined;
 

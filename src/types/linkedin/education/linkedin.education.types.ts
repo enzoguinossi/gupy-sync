@@ -1,4 +1,4 @@
-import { LinkedinDates } from "../shared/linkedin.shared.types.js";
+import { LinkedinDates } from "@/types/linkedin/shared/linkedin.shared.types.js";
 
 export interface LinkedinEducationRaw {
 	"School Name": string;

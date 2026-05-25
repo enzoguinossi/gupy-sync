@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
-import { HttpError } from "../../errors/index.js";
-import { GupyAchievementsPayload } from "./achievements/gupy.achievement.input.types.js";
-import { GupyAchievementsResponse } from "./achievements/gupy.achievement.raw.types.js";
-import { GupyFormationsRaw } from "./education/gupy.education.raw.types.js";
+import { HttpError } from "@/errors/index.js";
+import { GupyAchievementsPayload } from "@/types/gupy/achievement/input/gupy.achievement.input.types.js";
+import { GupyAchievementsResponse } from "@/types/gupy/achievement/raw/gupy.achievement.raw.types.js";
+import { GupyFormationsRaw } from "@/types/gupy/education/raw/gupy.education.raw.types.js";
 
 const ACHIEVEMENTS_PATH = "/curriculum-management/candidate/curriculum/achievement";
 const EDUCATION_PATH = "/curriculum-management/candidate/curriculum/academic-formation";

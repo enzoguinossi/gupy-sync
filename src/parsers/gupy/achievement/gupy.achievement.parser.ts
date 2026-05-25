@@ -2,8 +2,8 @@ import {
 	GupyAchievementRaw,
 	GupyAchievementsResponse,
 	GupyAchievementTypesEnum,
-} from "../../../services/gupy/achievements/gupy.achievement.raw.types.js";
-import { AchievementEntity, AchievementType } from "../../../domain/entities/achievement.entity.js";
+} from "@/types/gupy/achievement/raw/gupy.achievement.raw.types.js";
+import { AchievementEntity, AchievementType } from "@/domain/entities/achievement.entity.js";
 
 function mapGupyTypeToDomain(type: string): AchievementType {
 	switch (type) {
@@ -24,9 +24,8 @@ function parseAchievement(raw: GupyAchievementRaw): AchievementEntity {
 	return {
 		name: raw.name,
 		type: mapGupyTypeToDomain(raw.type),
-		issuer: "Gupy (Importado)", // Gupy não retorna o emissor explicitamente na estrutura básica
+		issuer: "Gupy (Importado)",
 		description: raw.description,
-		// Gupy não retorna datas estruturadas ou URL/CredentialID na lista básica
 	};
 }
 

@@ -1,13 +1,12 @@
 import { inferSchema, initParser } from "udsv";
-import "./linkedin.education.types.js";
-import { readCsv } from "../../../shared/csv/readCsv.js";
-import { LinkedinEducationParsed, LinkedinEducationRaw } from "./linkedin.education.types.js";
-import { CsvParseError } from "../../../errors/index.js";
-import { parseLinkedinDate, mapLinkedinMonthToNumber } from "../shared/linkedin.date.parser.js";
-import { LinkedinDatesMonths } from "../shared/linkedin.shared.types.js";
-import { EducationEntity } from "../../../domain/entities/education.entity.js";
-import { EducationStatus } from "../../../domain/enums/education-status.enum.js";
-import { detectEducationLevel } from "../../shared/detectEducationLevel.js";
+import { readCsv } from "@/shared/csv/readCsv.js";
+import { LinkedinEducationParsed, LinkedinEducationRaw } from "@/types/linkedin/education/linkedin.education.types.js";
+import { CsvParseError } from "@/errors/index.js";
+import { parseLinkedinDate, mapLinkedinMonthToNumber } from "@/parsers/linkedin/shared/linkedin.date.parser.js";
+import { LinkedinDatesMonths } from "@/types/linkedin/shared/linkedin.shared.types.js";
+import { EducationEntity } from "@/domain/entities/education.entity.js";
+import { EducationStatus } from "@/domain/enums/education-status.enum.js";
+import { detectEducationLevel } from "@/parsers/shared/detectEducationLevel.js";
 
 function parseRawEducation(csv: string): LinkedinEducationRaw[] {
 	const schema = inferSchema(csv);

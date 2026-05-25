@@ -1,5 +1,5 @@
-import { GupyAchievementInput } from "../achievements/gupy.achievement.input.types.js";
-import { GupyEducationPayload } from "../education/gupy.education.input.types.js";
+import { GupyAchievementInput } from "@/types/gupy/achievement/input/gupy.achievement.input.types.js";
+import { GupyEducationPayload } from "@/types/gupy/education/input/gupy.education.input.types.js";
 
 export function buildAchievementsPayload(achievements: GupyAchievementInput[]) {
 	return {

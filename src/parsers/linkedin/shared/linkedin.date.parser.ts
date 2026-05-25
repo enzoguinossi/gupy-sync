@@ -1,4 +1,4 @@
-import { LinkedinDates, LinkedinDatesMonths } from "./linkedin.shared.types.js";
+import { LinkedinDates, LinkedinDatesMonths } from "@/types/linkedin/shared/linkedin.shared.types.js";
 
 export const MONTHS_MAP: Record<LinkedinDatesMonths, number> = {
 	Jan: 1,

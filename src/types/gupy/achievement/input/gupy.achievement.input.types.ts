@@ -1,4 +1,4 @@
-import { GupyAchievementTypesEnum } from "./gupy.achievement.raw.types.js";
+import { GupyAchievementTypesEnum } from "@/types/gupy/achievement/raw/gupy.achievement.raw.types.js";
 
 export interface GupyAchievementInput {
 	type: GupyAchievementTypesEnum;

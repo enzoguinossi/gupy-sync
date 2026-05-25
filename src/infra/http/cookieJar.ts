@@ -1,5 +1,5 @@
 import { CookieJar } from "tough-cookie";
-import { env } from "../../config/env.js";
+import { env } from "@/config/env.js";
 
 export async function createGupyCookieJar(): Promise<CookieJar> {
 	const jar = new CookieJar();

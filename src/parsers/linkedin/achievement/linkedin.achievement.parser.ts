@@ -1,9 +1,9 @@
-import { CsvParseError } from "../../../errors/index.js";
+import { CsvParseError } from "@/errors/index.js";
 import { inferSchema, initParser } from "udsv";
-import { LinkedinAchievementParsed, LinkedinAchievementRaw } from "./linkedin.achievement.types.js";
-import { readCsv } from "../../../shared/csv/readCsv.js";
-import { mapLinkedinMonthToNumber, parseLinkedinDate } from "../shared/linkedin.date.parser.js";
-import { AchievementEntity, AchievementType } from "../../../domain/entities/achievement.entity.js";
+import { LinkedinAchievementParsed, LinkedinAchievementRaw } from "@/types/linkedin/achievement/linkedin.achievement.types.js";
+import { readCsv } from "@/shared/csv/readCsv.js";
+import { mapLinkedinMonthToNumber, parseLinkedinDate } from "@/parsers/linkedin/shared/linkedin.date.parser.js";
+import { AchievementEntity, AchievementType } from "@/domain/entities/achievement.entity.js";
 
 function parseRawAchievements(csv: string): LinkedinAchievementRaw[] {
 	const schema = inferSchema(csv);

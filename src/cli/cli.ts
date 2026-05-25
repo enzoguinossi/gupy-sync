@@ -1,18 +1,18 @@
-import packageInfo from "../shared/util/packageInfo.js";
+import packageInfo from "@/shared/util/packageInfo.js";
 import { Command, CommanderError } from "commander";
 
-import { ExitCode, isKnownError } from "../errors/index.js";
+import { ExitCode, isKnownError } from "@/errors/index.js";
 
-import { syncGupyToLinkedin } from "../application/sync/syncLinkedinAchievementsToGupy.js";
-import { getGupyAchievements } from "../application/gupy/getGupyAchievements.js";
-import { syncLinkedinEducationToGupy } from "../application/sync/syncLinkedinEducationToGupy.js";
-import { cliUserInput } from "../infra/cli/cliUserInput.js";
-import { initEnv } from "../config/env.js";
-import { getLinkedinAchievements } from "../application/linkedin/getLinkedinAchievements.js";
-import { getLinkedInFormation } from "../application/linkedin/getLinkedInFormation.js";
-import { displayAchievements } from "./displayers/achievement.displayer.js";
-import { displayEducation } from "./displayers/education.displayer.js";
-import { getGupyEducation } from "../application/gupy/getGupyEducation.js";
+import { syncGupyToLinkedin } from "@/application/sync/syncLinkedinAchievementsToGupy.js";
+import { getGupyAchievements } from "@/application/gupy/getGupyAchievements.js";
+import { syncLinkedinEducationToGupy } from "@/application/sync/syncLinkedinEducationToGupy.js";
+import { cliUserInput } from "@/infra/cli/cliUserInput.js";
+import { initEnv } from "@/config/env.js";
+import { getLinkedinAchievements } from "@/application/linkedin/getLinkedinAchievements.js";
+import { getLinkedInFormation } from "@/application/linkedin/getLinkedInFormation.js";
+import { displayAchievements } from "@/cli/displayers/achievement.displayer.js";
+import { displayEducation } from "@/cli/displayers/education.displayer.js";
+import { getGupyEducation } from "@/application/gupy/getGupyEducation.js";
 
 const program = new Command();
 const userInput = cliUserInput;
@@ -78,8 +78,18 @@ program
 
 program.exitOverride();
 
-program.hook("preAction", () => {
-	initEnv(program.opts());
+const TOKENLESS_COMMANDS = ["mostrar-certificados-linkedin", "mostrar-formacao-linkedin"];
+
+program.hook("preAction", (thisCommand, actionCommand) => {
+	const commandName = actionCommand.name();
+	const subOpts = actionCommand.opts();
+
+	const isDryRun = subOpts.dryRun ?? false;
+	const isTokenless = TOKENLESS_COMMANDS.includes(commandName) || isDryRun;
+
+	if (!isTokenless) {
+		initEnv(program.opts());
+	}
 });
 
 try {
