@@ -2,7 +2,7 @@
 	"name": "gupy-sync",
 	"version": "0.4.0",
 	"description": "CLI para sincronizar dados do LinkedIn com a Gupy",
-	"homepage": "https://github.com/enzoguinossi/gupy-linkedin-sync",
+	"homepage": "https://github.com/enzoguinossi/gupy-sync",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/enzoguinossi/gupy-linkedin-sync"
