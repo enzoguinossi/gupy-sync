@@ -1,13 +1,9 @@
 # Agent Documentation
 
-Este documento centraliza todas as **informações externas** do projeto, incluindo:
+Documentação centralizada para desenvolvimento, manutenção e testes do gupy-sync.
+Use como **fonte de verdade** para decisões de arquitetura, contratos de API e regras de negócio.
 
-- Estrutura de payloads enviados e recebidos
-- Contratos de integração
-- Estrutura e mapeamento de arquivos CSV
-- Regras e validações importantes
-
-Este arquivo deve ser utilizado como **fonte de verdade** para desenvolvimento, manutenção e testes.
+---
 
 ## 🔧 Comandos
 
@@ -15,64 +11,171 @@ Este arquivo deve ser utilizado como **fonte de verdade** para desenvolvimento, 
 |---------|-----------|
 | `npm run dev` | Executa em desenvolvimento com `tsx` |
 | `npm run build` | Compila TypeScript com `tsc` + resolve aliases `@/` com `tsc-alias` |
-| `npm test` | Executa testes com `vitest` (quando implementados) |
+| `npm test` | Executa testes com `vitest` (78 testes) |
+| `npm run test:watch` | Modo watch dos testes |
+| `npm run prepack` | Build automático antes do `npm publish` |
+
+**CI/CD:** GitHub Actions em `.github/workflows/release.yml`
+- Trigger: push de tag `v*`
+- Faz build, zip, cria release no GitHub, publica no npm com `--provenance` (Trusted Publishing/OIDC)
+- ⚠️ **Bug corrigido:** `npm logout` estava antes do `npm publish` (impedia publicação)
+
+---
 
 ## 📁 Path Alias
 
 O projeto usa `@/` como alias para `src/` (ex: `@/domain/entities/education.entity.js`).
 O `tsc-alias` converte automaticamente para caminhos relativos no `dist/`.
 
-## 🧩 Tipos e Contratos (TypeScript)
+---
 
-Todos os tipos de integração estão centralizados em `src/types/`.
+## 🏗️ Arquitetura (Adapter Pattern)
 
-### Gupy – Education
+```
+src/
+  domain/                ← Lógica pura, sem dependências externas
+    entities/            ← AchievementEntity, EducationEntity
+    enums/               ← EducationLevel, EducationStatus
+    services/            ← diffByKey(), DiffResult — genérico
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `src/types/gupy/education/enum/gupy.education.enum.ts` | `GupyEducationTypes`, `GupyEducationConclusionStatus`, `GupyUnderGraduationTypes` |
-| `src/types/gupy/education/input/gupy.education.input.types.ts` | `GupyEducationInput`, `GupyEducationPayload` |
-| `src/types/gupy/education/raw/gupy.education.raw.types.ts` | `GupyFormationRaw`, `GupyFormationsRaw` |
+  parsers/
+    linkedin/            ← Parse de CSV do LinkedIn (fonte de dados)
 
-### Gupy – Achievement
+  types/
+    linkedin/            ← Tipos dos dados do LinkedIn
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `src/types/gupy/achievement/input/gupy.achievement.input.types.ts` | `GupyAchievementInput`, `GupyAchievementsPayload` |
-| `src/types/gupy/achievement/raw/gupy.achievement.raw.types.ts` | `GupyAchievementTypesEnum`, `GupyAchievementRaw`, `GupyAchievementsResponse` |
+  platform/
+    contracts/           ← Interface Platform (contrato para qualquer plataforma)
+      Platform.ts        ← getAchievements, replaceEducation, getAchievementMatchKey, etc.
+      PlatformFactory.ts ← resolvePlatform("gupy", { token }) → carrega adapter
+    gupy/                ← Adapter Gupy
+      GupyPlatform.ts    ← Implementa Platform
+      GupyHttpService.ts ← HTTP service (chamadas à API)
+      GupyClientFactory.ts
+      mappers/           ← Domain → Gupy format
+      parsers/           ← Gupy raw → Domain
+      payloads/          ← Montagem de payloads da API
+      types/             ← Tipos internos do Gupy
 
-### LinkedIn
+  application/
+    linkedin/            ← Leitura de CSV do LinkedIn
+    sync/
+      syncLinkedinAchievements.ts  ← sync + diff, recebe Platform
+      syncLinkedinEducation.ts     ← sync + diff, recebe Platform
+    platform/
+      getAchievements.ts ← Operação genérica de leitura
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `src/types/linkedin/achievement/linkedin.achievement.types.ts` | `LinkedinAchievementRaw`, `LinkedinAchievementParsed` |
-| `src/types/linkedin/education/linkedin.education.types.ts` | `LinkedinEducationRaw`, `LinkedinEducationParsed` |
-| `src/types/linkedin/shared/linkedin.shared.types.ts` | `LinkedinDates`, `LinkedinDatesMonths` |
+  cli/
+    cli.ts               ← CLI com --platform e --diff
+    displayers/          ← Display de achievements, education, diff
 
-### Domínio (entidades internas)
+  config/
+    env.ts               ← getEnvVar(name) — genérico
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `src/domain/entities/achievement.entity.ts` | `AchievementEntity`, `AchievementType` |
-| `src/domain/entities/education.entity.ts` | `EducationEntity` |
-| `src/domain/enums/education-level.enum.ts` | `EducationLevel` |
-| `src/domain/enums/education-status.enum.ts` | `EducationStatus` |
-
+  infra/
+    cli/                 ← UserInput (usa EducationLevel do domínio)
+```
 
 ---
 
-## 📦 Integrações Externas
+## 🔄 Fluxo de Dados
 
-### Plataforma: Gupy / LinkedIn
+### Sync (ex: importar-certificados)
+```
+CSV LinkedIn → linkedin.parser → AchievementEntity[]
+                                   ↓
+                            Platform.replaceAchievements()
+                                   ↓
+                            GupyPlatform (adapter)
+                              → mapper (Domain → Gupy)
+                              → payload builder
+                              → HTTP PUT
+```
 
-O projeto realiza sincronização de dados de **certificados** e **formação educacional**, utilizando payloads JSON e
-arquivos CSV como fonte.
+### Diff (ex: importar-certificados --diff)
+```
+CSV LinkedIn → linkedin.parser → AchievementEntity[]
+Platform     → getAchievements → AchievementEntity[]
+                                   ↓
+                            diffByKey(linkedin, platform, getMatchKey)
+                                   ↓
+                            DiffResult { added, removed, kept }
+                                   ↓
+                            displayer com cores (+ verde, - vermelho, ~ cinza)
+```
 
 ---
 
-## 📄 Payload: Certificados (GET / PUT)
+## 🧩 Platform Interface
 
-### Estrutura Geral
+```typescript
+interface Platform {
+  readonly name: string;
+
+  // Match keys para diff (cada plataforma define seus próprios critérios)
+  getAchievementMatchKey(entity: AchievementEntity): string;
+  getEducationMatchKey(entity: EducationEntity): string;
+
+  // Operações CRUD
+  getAchievements(): Promise<AchievementEntity[]>;
+  replaceAchievements(achievements: AchievementEntity[]): Promise<void>;
+  getEducation(): Promise<EducationEntity[]>;
+  replaceEducation(education: EducationEntity[], underGraduationDegree?: string): Promise<void>;
+}
+```
+
+**Regras de matching por plataforma:**
+
+| Plataforma | Achievement Match Key | Education Match Key |
+|------------|----------------------|---------------------|
+| Gupy | `name` (case-insensitive) | `institution \| level` |
+| Futura (TOTVS) | `name \| issuer` | `institution \| course \| level` |
+
+---
+
+## 🧪 Testes (78 testes, 5 arquivos)
+
+```
+src/__tests__/
+  detectEducationLevel.test.ts     (23 testes) — Detecção de nível educacional
+  linkedin.education.parser.test.ts (15 testes) — Parse de CSV de formação
+  linkedin.achievement.parser.test.ts (10 testes) — Parse de CSV de certificados
+  diff.service.test.ts              (8 testes) — Lógica de diff
+  gupy.mapper.test.ts              (22 testes) — Mapeamento domínio → Gupy
+```
+
+**Mocks:** `src/__tests__/mocks/` — CSVs de exemplo (Education.csv, Certifications.csv, EdgeCases.csv)
+
+---
+
+## 🧠 Regras de Negócio Importantes
+
+### Detecção de Nível Educacional (`detectEducationLevel`)
+- Concatena `degreeName` + `notes` e busca por regex em ordem de precedência
+- **Ordem importa:** Pós-graduação antes de Graduação, Pós-doutorado antes de Doutorado
+- O normalizador (`normalizeDegreeText`) remove acentos, hífens e converte para lowercase
+- Suporta termos em PT e EN
+- Se não reconhecer, retorna `EducationLevel.Unknown`
+
+### Status de Conclusão
+- Baseado na `endDate` comparada com a data atual
+- Futuro = `InProgress`, Passado = `Completed`
+
+### Diff
+- Usa `diffByKey<T>(fromLeft, fromRight, getKey)` — genérico, recebe função de extração de chave
+- Cada plataforma fornece sua própria `getMatchKey` (ex: Gupy ignora `issuer` porque não armazena)
+- As chaves são comparadas como string — case-insensitive
+
+### Gupy Platform Specifics
+- Gupy **não armazena `issuer`** em achievements — o mapper coloca no `description`
+- Gupy **não armazena `url` ou `credentialId`** separadamente — tudo vai no `description`
+- `underGraduationDegree` é inferido: se há formação superior, assume `completed_high_school`
+
+---
+
+## 📄 Payloads da API (Gupy)
+
+### Certificados (GET / PUT)
 
 ```json
 {
@@ -86,25 +189,7 @@ arquivos CSV como fonte.
 }
 ```
 
-**Campos**
-
-| Campo         | Tipo   | Obrigatório | Descrição                                                |
-|---------------|--------|-------------|----------------------------------------------------------|
-| `type`        | string | ✅ Sim       | Tipo do achievement (ex: `courses`)                      |
-| `name`        | string | ✅ Sim       | Nome do certificado                                      |
-| `description` | string | ❌ Não       | Informações adicionais (instituição, URL, licença, etc.) |
-
-**Regras**
-
-- `type` sempre deve ser uma string
-- `name` não pode ser vazio
-- `description` pode ser omitido
-
-Todos os certificados são enviados dentro do array `achievements`
-
-## 🎓 Payload: Formação / Educação (GET / PUT)
-
-### Estrutura Geral
+### Formação (GET / PUT)
 
 ```json
 {
@@ -124,63 +209,66 @@ Todos os certificados são enviados dentro do array `achievements`
 }
 ```
 
-**Campos – formations[]**
+---
 
-| Campo              | Tipo   | Obrigatório | Descrição                                                    |
-|--------------------|--------|-------------|--------------------------------------------------------------|
-| `formation`        | string | ✅ Sim       | Tipo da formação (`technological`, `technical_course`, etc.) |
-| `conclusionStatus` | string | ✅ Sim       | Status (`in_progress`, `completed`)                          |
-| `course`           | string | ✅ Sim       | Nome do curso                                                |
-| `institution`      | string | ✅ Sim       | Instituição de ensino                                        |
-| `startDateMonth`   | number | ✅ Sim       | Mês de início (1–12)                                         |
-| `startDateYear`    | string | ✅ Sim       | Ano de início                                                |
-| `endDateMonth`     | number | ✅ Sim       | Mês de término                                               |
-| `endDateYear`      | string | ✅ Sim       | Ano de término                                               |
+## 📊 CSV: LinkedIn
 
-**Campo underGraduationDegree (opcional)**
-
-| Campo                   | Tipo   | Obrigatório | Descrição            |
-|-------------------------|--------|-------------|----------------------|
-| `underGraduationDegree` | string | ❌ Não       | Grau de escolaridade |
-
-## 📊 CSV: Formação Acadêmica
-
-### Estrutura
+### Formação Acadêmica
 
 ```csv
 School Name,Start Date,End Date,Notes,Degree Name,Activities
 ```
 
-| Coluna        | Descrição                         |
-|---------------|-----------------------------------|
-| `School Name` | Nome da instituição               |
-| `Start Date`  | Data inicial (ex: `Jan 2026`)     |
-| `End Date`    | Data final (ex: `Aug 2028`)       |
-| `Notes`       | Observações adicionais (opcional) |
-| `Degree Name` | Nome do grau (opcional)           |
-| `Activities`  | Atividades realizadas (opcional)  |
+| Coluna | Descrição |
+|--------|-----------|
+| `School Name` | Nome da instituição |
+| `Start Date` / `End Date` | Formato `MMM YYYY` (ex: `Jan 2026`) |
+| `Notes` | Observações — usado para detectar nível educacional |
+| `Degree Name` | Nome do grau (ex: `Bachelor's Degree`) |
+| `Activities` | Atividades (não utilizado) |
 
-**Observações**
-
-- Datas estão no formato `MMM YYYY`
-- Campos vazios são permitidos
-- Cada linha representa uma formação
-
-## 📜 CSV: Certificados (Certifications.csv)
-
-### Estrutura
+### Certificados
 
 ```csv
 Name,Url,Authority,Started On,Finished On,License Number
 ```
 
-**Colunas**
+| Coluna | Descrição |
+|--------|-----------|
+| `Name` | Nome do certificado |
+| `Url` | URL de verificação |
+| `Authority` | Instituição emissora |
+| `Started On` / `Finished On` | Formato `MMM YYYY` |
+| `License Number` | ID da licença |
 
-| Coluna           | Obrigatório | Descrição               |
-|------------------|-------------|-------------------------|
-| `Name`           | ✅ Sim       | Nome do certificado     |
-| `Url`            | ❌ Não       | URL do certificado      |
-| `Authority`      | ❌ Não       | Instituição emissora    |
-| `Started On`     | ❌ Não       | Data de início          |
-| `Finished On`    | ❌ Não       | Data de conclusão       |
-| `License Number` | ❌ Não       | Número de licença ou ID |
+---
+
+## 🚀 Como adicionar uma nova plataforma
+
+1. Criar `src/platform/minhaplataforma/MinhaPlataforma.ts` implementando `Platform`
+2. Definir `getAchievementMatchKey` e `getEducationMatchKey` (quais campos usar para diff)
+3. Implementar chamadas HTTP, mappers domain→platform e parsers platform→domain
+4. Registrar em `src/platform/contracts/PlatformFactory.ts`:
+   ```typescript
+   const PLATFORM_REGISTRY = {
+     gupy: GupyPlatform,
+     minhaplataforma: MinhaPlataforma,
+   };
+   ```
+5. O CLI automaticamente suporta `--platform minhaplataforma`
+
+---
+
+## 🐛 Histórico de Bugs Corrigidos
+
+| Bug | Solução |
+|-----|---------|
+| Amend removeu 8 arquivos novos | Restaurado do backup local |
+| `@types/node` ausente nas devDeps | Adicionado ao package.json |
+| `preAction` exigia token Gupy para comandos locais | Token check movido para `resolvePlatform()` |
+| `release.yml`: `npm logout` antes de `npm publish` | Ordem corrigida |
+| `release.yml`: sem `--provenance` para OIDC | Adicionado |
+| `detectEducationLevel("Pós-Graduação")` retornava BACHELOR | Reordenado regex + `normalizeDegreeText` trata hífens |
+| Tipos Gupy espalhados entre parsers/ e services/ | Centralizados em `src/types/gupy/` → depois `src/platform/gupy/types/` |
+| CLI descrevia comandos como "Gupy" | Agora diz "plataforma" |
+| `imports relativos` profundos | Substituídos por `@/` alias |

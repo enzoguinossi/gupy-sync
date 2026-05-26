@@ -3,49 +3,64 @@ import { Command, CommanderError } from "commander";
 
 import { ExitCode, isKnownError } from "@/errors/index.js";
 
-import { syncGupyToLinkedin } from "@/application/sync/syncLinkedinAchievementsToGupy.js";
-import { getGupyAchievements } from "@/application/gupy/getGupyAchievements.js";
-import { syncLinkedinEducationToGupy } from "@/application/sync/syncLinkedinEducationToGupy.js";
-import { cliUserInput } from "@/infra/cli/cliUserInput.js";
-import { initEnv } from "@/config/env.js";
+import { syncLinkedinAchievements, diffLinkedinAchievements } from "@/application/sync/syncLinkedinAchievements.js";
+import { syncLinkedinEducation, diffLinkedinEducation } from "@/application/sync/syncLinkedinEducation.js";
 import { getLinkedinAchievements } from "@/application/linkedin/getLinkedinAchievements.js";
 import { getLinkedInFormation } from "@/application/linkedin/getLinkedInFormation.js";
+import { getAchievements } from "@/application/platform/getAchievements.js";
+import { getEducation } from "@/application/platform/getEducation.js";
 import { displayAchievements } from "@/cli/displayers/achievement.displayer.js";
 import { displayEducation } from "@/cli/displayers/education.displayer.js";
-import { getGupyEducation } from "@/application/gupy/getGupyEducation.js";
+import { displayAchievementDiff, displayEducationDiff } from "@/cli/displayers/diff.displayer.js";
+import { cliUserInput } from "@/infra/cli/cliUserInput.js";
+import { resolvePlatform } from "@/platform/contracts/PlatformFactory.js";
 
 const program = new Command();
 const userInput = cliUserInput;
 
 program
 	.name("gupy-sync")
-	.description("Ferramenta de sincronização entre LinkedIn e Gupy")
+	.description("Ferramenta de sincronização de dados do LinkedIn com plataformas de currículo")
 	.version(packageInfo.version)
-	.option("--token <token>", "Token de autenticação da Gupy")
+	.option("--platform <name>", "Plataforma de destino (gupy, ...)", "gupy")
+	.option("--token <token>", "Token de autenticação da plataforma")
 	.option("--debug", "Exibe o stack trace completo em caso de erro");
 
 program
 	.command("importar-certificados")
 	.description("Importa certificados a partir do CSV do LinkedIn")
 	.requiredOption("--csv <path>", "Caminho para o CSV exportado do LinkedIn")
-	.option("--dry-run", "Não envia dados para a Gupy, apenas exibe o resultado da análise")
+	.option("--dry-run", "Não envia dados, apenas exibe o resultado da análise")
+	.option("--diff", "Mostra diferenças entre LinkedIn e plataforma sem sincronizar")
 	.action(async (options) => {
-		await syncGupyToLinkedin(options.csv, options.dryRun);
+		if (options.dryRun) {
+			await syncLinkedinAchievements(options.csv, true);
+			return;
+		}
+		const platform = resolvePlatform(program.opts().platform, { token: options.token ?? program.opts().token });
+		if (options.diff) {
+			const result = await diffLinkedinAchievements(options.csv, platform);
+			displayAchievementDiff(result);
+			return;
+		}
+		await syncLinkedinAchievements(options.csv, false, platform);
 	});
 
 program
 	.command("mostrar-certificados")
-	.description("Exibe os certificados atualmente cadastrados na Gupy")
+	.description("Exibe os certificados atualmente cadastrados na plataforma")
 	.action(async () => {
-		const data = await getGupyAchievements();
+		const platform = resolvePlatform(program.opts().platform, { token: program.opts().token });
+		const data = await getAchievements(platform);
 		displayAchievements(data);
 	});
 
 program
 	.command("mostrar-formacao")
-	.description("Exibe a formação atualmente cadastrada na Gupy")
+	.description("Exibe a formação atualmente cadastrada na plataforma")
 	.action(async () => {
-		const data = await getGupyEducation();
+		const platform = resolvePlatform(program.opts().platform, { token: program.opts().token });
+		const data = await getEducation(platform);
 		displayEducation(data);
 	});
 
@@ -69,11 +84,22 @@ program
 
 program
 	.command("importar-formacao")
-	.description("Substitui a formação acadêmica da Gupy pelos dados do LinkedIn")
+	.description("Substitui a formação acadêmica pelos dados do LinkedIn")
 	.requiredOption("--csv <path>", "Caminho para o CSV exportado do LinkedIn")
-	.option("--dry-run", "Não envia dados para a Gupy, apenas exibe o payload gerado")
+	.option("--dry-run", "Não envia dados, apenas exibe o resultado da análise")
+	.option("--diff", "Mostra diferenças entre LinkedIn e plataforma sem sincronizar")
 	.action(async (options) => {
-		await syncLinkedinEducationToGupy(options.csv, options.dryRun, userInput);
+		if (options.dryRun) {
+			await syncLinkedinEducation(options.csv, true, userInput);
+			return;
+		}
+		const platform = resolvePlatform(program.opts().platform, { token: options.token ?? program.opts().token });
+		if (options.diff) {
+			const result = await diffLinkedinEducation(options.csv, userInput, platform);
+			displayEducationDiff(result);
+			return;
+		}
+		await syncLinkedinEducation(options.csv, false, userInput, platform);
 	});
 
 program.exitOverride();
@@ -88,7 +114,7 @@ program.hook("preAction", (thisCommand, actionCommand) => {
 	const isTokenless = TOKENLESS_COMMANDS.includes(commandName) || isDryRun;
 
 	if (!isTokenless) {
-		initEnv(program.opts());
+		// Token validation happens inside resolvePlatform() when the action runs
 	}
 });
 

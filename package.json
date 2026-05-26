@@ -24,6 +24,8 @@
 	"scripts": {
 		"dev": "tsx src/index.ts",
 		"build": "tsc && tsc-alias",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"prepack": "npm run build"
 	},
 	"dependencies": {

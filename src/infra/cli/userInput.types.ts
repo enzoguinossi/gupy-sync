@@ -1,9 +1,6 @@
-import {
-	GupyEducationTypes,
-	GupyUnderGraduationTypes,
-} from "@/types/gupy/education/enum/gupy.education.enum.js";
+import { EducationLevel } from "@/domain/enums/education-level.enum.js";
 
 export interface UserInput {
-	selectFormationType(context: string): Promise<GupyEducationTypes | GupyUnderGraduationTypes>;
+	selectFormationType(context: string): Promise<EducationLevel>;
 	askCourseName(context: string): Promise<string>;
 }

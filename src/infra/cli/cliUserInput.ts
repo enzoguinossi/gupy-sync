@@ -1,25 +1,23 @@
 import { input, select } from "@inquirer/prompts";
-import { UserInput } from "@/infra/cli/userInput.types.js";
+import { UserInput } from "./userInput.types.js";
+import { EducationLevel } from "@/domain/enums/education-level.enum.js";
 
-import {
-	GupyEducationTypes,
-	GupyUnderGraduationTypes,
-} from "@/types/gupy/education/enum/gupy.education.enum.js";
+const FORMATION_CHOICES: Array<{ name: string; value: EducationLevel }> = [
+	{ name: "Ensino Fundamental", value: EducationLevel.Elementary },
+	{ name: "Ensino Médio", value: EducationLevel.HighSchool },
+	{ name: "Curso Técnico", value: EducationLevel.Technical },
+	{ name: "Tecnólogo", value: EducationLevel.Technologist },
+	{ name: "Graduação", value: EducationLevel.Bachelor },
+	{ name: "Pós-Graduação", value: EducationLevel.PostGraduate },
+	{ name: "Mestrado", value: EducationLevel.Master },
+	{ name: "Doutorado", value: EducationLevel.Doctorate },
+];
 
 export const cliUserInput: UserInput = {
 	async selectFormationType(context) {
-		return select<GupyEducationTypes | GupyUnderGraduationTypes>({
+		return select<EducationLevel>({
 			message: `Qual o tipo da formação em "${context}"?`,
-			choices: [
-				{ name: "Ensino Fundamental", value: GupyUnderGraduationTypes.completedElementarySchool },
-				{ name: "Ensino Médio", value: GupyUnderGraduationTypes.completedHighSchool },
-				{ name: "Curso Técnico", value: GupyEducationTypes.technical_course },
-				{ name: "Tecnólogo", value: GupyEducationTypes.technological },
-				{ name: "Graduação", value: GupyEducationTypes.graduation },
-				{ name: "Pós-Graduação", value: GupyEducationTypes.post_graduate },
-				{ name: "Mestrado", value: GupyEducationTypes.master_degree },
-				{ name: "Doutorado", value: GupyEducationTypes.phd },
-			],
+			choices: FORMATION_CHOICES,
 		});
 	},
 
